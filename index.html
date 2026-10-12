@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACK MONK HUB - Stock & Sales</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f5d000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+*{box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif;margin:0;padding:0}
+body{background:#0a0a0a;color:#fff;padding-bottom:90px}
+header{background:#111;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #222;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;border:1px solid #f5d000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+header h1{font-size:16px;line-height:1.1;letter-spacing:.5px}
+.header-actions{display:flex;gap:12px;color:#f5d000;font-size:20px}
+.subheader{text-align:center;padding:12px;color:#f5d000;font-size:12px;letter-spacing:2px}
+.subheader span{color:#777;font-size:11px;display:block;letter-spacing:0; margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.card-stat{background:#1a1a1a;border-radius:16px;padding:14px;border:1px solid #222;position:relative;overflow:hidden}
+.card-stat::before{content:'';position:absolute;top:0;left:20%;right:20%;height:4px;background:#f5d000;border-radius:0 0 10px 10px}
+.card-stat small{color:#aaa;font-size:12px}
+.card-stat b{font-size:22px;display:block;margin:4px 0}
+.card-stat.trend{font-size:11px;color:#f5d000}
+.card-stat.trend.green{color:#4ade80}
+.section{margin:16px 12px;background:#151515;border-radius:16px;border:1px solid #222;padding:14px}
+.section-head{display:flex;justify-content:space-between;margin-bottom:10px}
+.section-head a{color:#f5d000;font-size:13px;text-decoration:none}
+.low-item{display:flex;justify-content:space-between;align-items:center;background:#1c1c1c;border:1px solid #222;border-radius:12px;padding:12px;margin:8px 0}
+.tabs{position:fixed;bottom:10px;left:10px;right:10px;background:#1e1e1e;border-radius:20px;display:flex;justify-content:space-around;padding:8px;border:1px solid #333}
+.tab-btn{flex:1;text-align:center;padding:10px 4px;border-radius:14px;background:transparent;border:0;color:#777;font-size:11px;cursor:pointer}
+.tab-btn.active{background:#f5d000;color:#000;font-weight:700}
+.tab-btn i{display:block;font-size:18px;margin-bottom:2px}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#0f0f0f;color:#fff;margin:6px 0 12px 0}
+.btn{padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;width:100%}
+.btn-yellow{background:#f5d000;color:#000}
+.page{display:none;padding:0 0 20px 0}
+.page.active{display:block}
+.item-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
+#installBtn{position:fixed;bottom:80px;right:12px;background:#f5d000;color:#000;padding:12px 16px;border-radius:30px;display:none;z-index:20;font-weight:800}
+</style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<div class="logo"><div class="logo-icon">◍</div><h1>BLACK MONK<br>HUB</h1></div>
+<div class="header-actions"><span>🔔</span><span>👤</span></div>
+</header>
+<div class="subheader">DASHBOARD • TODAY<span id="todayDate"></span></div>
+
+<div id="page-dashboard" class="page active">
+<div class="grid2">
+<div class="card-stat"><small>Today's Sales UGX</small><b id="todaySales">0</b><div class="trend green">↗ <span id="salesTrend">+12.5% vs yesterday</span></div></div>
+<div class="card-stat"><small>Today's Profit</small><b id="todayProfit">0</b><small>Profit Margin <span id="margin">0%</span></small><div class="trend green">↗ +4.2%</div></div>
+<div class="card-stat"><small>Stock Value</small><b id="stockValue">0</b><small><span id="totalItems">0 items</span> • Healthy stock</small></div>
+<div class="card-stat"><small>Low Stock Alert ⚠️</small><b class="low-alert" id="lowCount">0 items</b><small>Needs restock</small></div>
+</div>
+<div class="section">
+<div class="section-head"><h4>Low Stock Alert</h4><a onclick="showPage('stock')">See all ></a></div>
+<div id="lowStockList"><small style="color:#777">No low stock - all good</small></div>
+</div>
+</div>
+
+<div id="page-stock" class="page">
+<div class="section">
+<h4>Add New Stock</h4>
+<input id="itemName" placeholder="e.g. Hair Relaxer, Hotspot 1hr">
+<select id="itemCat"><option>Salon Products</option><option>Hotspot Vouchers</option><option>Ice Cream & Drinks</option><option>Other</option></select>
+<div class="grid2" style="padding:0"><div><small>Qty</small><input id="itemQty" type="number" value="10"></div><div><small>Buy Price</small><input id="itemBuy" type="number"></div></div>
+<small>Sell Price</small><input id="itemSell" type="number">
+<button class="btn btn-yellow" onclick="addStock()">Add / Update Stock</button>
+</div>
+<div class="section"><h4>Current Stock</h4><div id="stockList"></div></div>
+</div>
+
+<div id="page-sell" class="page">
+<div class="section">
+<h4>Record Sale</h4>
+<select id="sellItem"></select>
+<div class="grid2" style="padding:0"><div><small>Qty</small><input id="sellQty" type="number" value="1" oninput="calc()"></div><div><small>Total UGX</small><input id="sellTotal" readonly></div></div>
+<small>Customer</small><input id="sellCust" placeholder="Walk-in">
+<button class="btn btn-yellow" onclick="makeSale()">Confirm Sale</button>
+<div id="sellInfo" style="margin-top:8px;color:#999;font-size:12px"></div>
+</div>
+</div>
+
+<div id="page-sales" class="page">
+<div class="section">
+<div class="section-head"><h4>Sales History</h4><button onclick="exportCSV()" style="background:transparent;border:1px solid #333;color:#fff;padding:6px 12px;border-radius:8px">Export CSV</button></div>
+<div id="salesList"></div>
+<button class="btn" style="background:#222;color:#fff;margin-top:12px" onclick="clearAll()">Clear All Data</button>
+</div>
+</div>
+
+<button id="installBtn" onclick="installApp()">📲 Install App</button>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="showPage('dashboard',this)"><i>⊞</i>Dashboard</button>
+<button class="tab-btn" onclick="showPage('stock',this)"><i>⧉</i>Stock</button>
+<button class="tab-btn" onclick="showPage('sell',this)"><i>⬚</i>Sell</button>
+<button class="tab-btn" onclick="showPage('sales',this)"><i>◷</i>Sales History</button>
+</div>
+
+<script>
+let stock = JSON.parse(localStorage.getItem('bm_stock')||'[]');
+let sales = JSON.parse(localStorage.getItem('bm_sales')||'[]');
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+function save(){localStorage.setItem('bm_stock',JSON.stringify(stock)); localStorage.setItem('bm_sales',JSON.stringify(sales));}
+function showPage(id,el){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById('page-'+id).classList.add('active');
+if(el){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active');}
+if(id==='dashboard') renderDash(); if(id==='stock') renderStock(); if(id==='sell') renderSell(); if(id==='sales') renderSales();
+}
+function addStock(){
+let n=document.getElementById('itemName').value.trim(); if(!n) return alert('Enter name');
+let cat=document.getElementById('itemCat').value;
+let q=parseInt(document.getElementById('itemQty').value)||0;
+let buy=parseInt(document.getElementById('itemBuy').value)||0;
+let sell=parseInt(document.getElementById('itemSell').value)||0;
+let ex=stock.find(s=>s.name.toLowerCase()===n.toLowerCase());
+if(ex){ex.qty+=q; ex.buy=buy; ex.sell=sell; ex.cat=cat;} else {stock.push({id:Date.now(),name:n,cat,qty:q,buy,sell});}
+save(); renderStock(); renderDash(); document.getElementById('itemName').value=''; alert('Saved!');
+}
+function renderStock(){
+let html=''; stock.forEach((s,i)=>{
+let badge = s.qty<=2?'<span style=background:#ff3b3b;color:#fff;padding:2px 6px;border-radius:8px;font-size:10px>LOW</span>': s.qty<=5?'<span style=background:#f5d000;color:#000;padding:2px 6px;border-radius:8px;font-size:10px>LOW</span>':'<span style=background:#22c55e;color:#000;padding:2px 6px;border-radius:8px;font-size:10px>OK</span>';
+html+=`<div class=item-row><div><b>${s.name}</b><br><small style=color:#777>${s.cat} • Buy ${s.buy} • Sell ${s.sell}</small></div><div style=text-align:right><b>${s.qty}</b><br>${badge}<br><small style=color:#ff3b3b;cursor:pointer onclick=delStock(${i})>Delete</small></div></div>`;
+});
+document.getElementById('stockList').innerHTML=html||'<small style=color:#777>No stock yet</small>';
+let opts=stock.map(s=>`<option value=${s.id}>${s.name} (${s.qty} left) - UGX ${s.sell}</option>`).join('');
+document.getElementById('sellItem').innerHTML=opts||'<option>No stock</option>';
+}
+function delStock(i){if(confirm('Delete?')){stock.splice(i,1); save(); renderStock(); renderDash();}}
+function renderSell(){renderStock(); calc();}
+function calc(){
+let id=document.getElementById('sellItem').value; let q=parseInt(document.getElementById('sellQty').value)||1;
+let it=stock.find(s=>s.id==id); if(it){document.getElementById('sellTotal').value=it.sell*q; document.getElementById('sellInfo').textContent=`Profit UGX ${(it.sell-it.buy)*q} | Left after: ${it.qty-q}`;}
+}
+function makeSale(){
+let id=document.getElementById('sellItem').value; let q=parseInt(document.getElementById('sellQty').value)||1; let cust=document.getElementById('sellCust').value||'Walk-in';
+let it=stock.find(s=>s.id==id); if(!it) return alert('No item'); if(it.qty<q) return alert('Only '+it.qty+' left');
+it.qty-=q; let sale={date:new Date().toLocaleString(),name:it.name,cat:it.cat,qty:q,total:it.sell*q,profit:(it.sell-it.buy)*q,customer:cust};
+sales.unshift(sale); save(); renderDash(); renderSell(); alert('Sold: '+it.name+' x'+q);
+}
+function renderDash(){
+let today=new Date().toLocaleDateString(); let todaySales=sales.filter(s=>new Date(s.date).toLocaleDateString()===today);
+let tS=todaySales.reduce((a,b)=>a+b.total,0); let tP=todaySales.reduce((a,b)=>a+b.profit,0);
+let sVal=stock.reduce((a,b)=>a+b.qty*b.buy,0); let low=stock.filter(s=>s.qty<=5);
+document.getElementById('todaySales').textContent=tS.toLocaleString(); document.getElementById('todayProfit').textContent=tP.toLocaleString();
+document.getElementById('stockValue').textContent=sVal.toLocaleString(); document.getElementById('totalItems').textContent=stock.reduce((a,b)=>a+b.qty,0)+' items';
+document.getElementById('lowCount').textContent=low.length+' items'; document.getElementById('margin').textContent= tS? Math.round(tP/tS*100)+'%':'0%';
+document.getElementById('lowStockList').innerHTML= low.length? low.map(s=>`<div class=low-item><span>● ${s.name}</span><span style=color:#f5d000;font-size:12px>${s.qty} left • Reorder at 10</span></div>`).join('') : '<small style=color:#777>No low stock</small>';
+}
+function renderSales(){
+let h=''; sales.forEach(s=>{h+=`<div class=item-row><div><b>${s.name}</b> x${s.qty}<br><small style=color:#777>${s.date} • ${s.customer}</small></div><div style=text-align:right><b>UGX ${s.total.toLocaleString()}</b><br><small style=color:#4ade80>+${s.profit}</small></div></div>`});
+document.getElementById('salesList').innerHTML=h||'<small style=color:#777>No sales yet</small>';
+}
+function exportCSV(){
+let csv='Date,Item,Category,Qty,Total,Profit,Customer\n'+sales.map(s=>`"${s.date}","${s.name}","${s.cat}",${s.qty},${s.total},${s.profit},"${s.customer}"`).join('\n');
+let b=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='BLACK_MONK_sales.csv'; a.click();
+}
+function clearAll(){if(confirm('Delete ALL data?')){localStorage.clear(); stock=[]; sales=[]; location.reload();}}
+let deferredPrompt; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').style.display='block';});
+function installApp(){if(deferredPrompt){deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{deferredPrompt=null; document.getElementById('installBtn').style.display='none';});}}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
+renderDash(); renderStock();
+</script>
+<script src="script.js"></script>
+</body>
+</html>
